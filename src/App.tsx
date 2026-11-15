@@ -1,14 +1,12 @@
-import { Canvas } from '@react-three/fiber'
+import SceneCanvas from './scene/SceneCanvas';
 
 export default function App() {
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
-      <Canvas>
-        <mesh>
-          <boxGeometry />
-          <meshNormalMaterial />
-        </mesh>
-      </Canvas>
-    </div>
-  )
+    <>
+      <SceneCanvas />
+      <main style={{ position: 'relative', zIndex: 1 }}>
+        {/* tall scrolling content and overlays go here */}
+      </main>
+    </>
+  );
 }
