@@ -71,3 +71,6 @@ $$;
 -- Only the server may call these functions, never the public anon key.
 revoke execute on function match_documents(extensions.vector, int) from public, anon, authenticated;
 revoke execute on function check_rate_limit(text, int, int) from public, anon, authenticated;
+
+grant execute on function match_documents(extensions.vector, int) to service_role;
+grant execute on function check_rate_limit(text, int, int) to service_role;
