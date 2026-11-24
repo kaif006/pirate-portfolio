@@ -1,6 +1,8 @@
 // Content for the five project islands, in the order the ship visits them.
 // Edit the text, colors and links freely; the 3D scene reads from this file.
 
+export type ProjectPhoto = { src: string; alt: string }
+
 export type Project = {
   id: string
   order: number
@@ -14,6 +16,7 @@ export type Project = {
   theme: { name: string; color: string }
   /** Looping clips placed in /public/media (WebM and MP4 for browser support). */
   media: { webm: string; mp4: string; poster?: string }[]
+  photos?: ProjectPhoto[]
   links: { label: string; url: string }[]
 }
 
@@ -33,7 +36,11 @@ export const projects: Project[] = [
       'Allocation-free frame loop and instanced scenery in one draw call',
     ],
     theme: { name: 'green', color: '#4f8a5b' },
-    media: [{ webm: '/media/spitfin.webm', mp4: '/media/spitfin.mp4' }],
+    media: [{ webm: '/media/spitfin.webm', mp4: '/media/spitfin.mp4', poster: '/media/spitfin.webp' }],
+    photos: [
+      { src: '/media/spitfin.webp', alt: 'Spitfin match preview' },
+      { src: '/media/spitfin-match.webp', alt: 'Overhead view of Spitfin’s forest arena' },
+    ],
     links: [], // TODO: add { label: 'Source', url: '...' }
   },
   {
@@ -69,7 +76,11 @@ export const projects: Project[] = [
       'Combos and physics-based attacks',
     ],
     theme: { name: 'rocky', color: '#7d7a78' },
-    media: [{ webm: '/media/ragdoll-party.webm', mp4: '/media/ragdoll-party.mp4' }],
+    media: [{ webm: '/media/ragdoll-party.webm', mp4: '/media/ragdoll-party.mp4', poster: '/media/ragdoll-party.webp' }],
+    photos: [
+      { src: '/media/ragdoll-party.webp', alt: 'Ragdoll Party Game preview' },
+      { src: '/media/ragdoll-arena.webp', alt: 'The low-poly arena in the Unreal project' },
+    ],
     links: [],
   },
   {
@@ -87,7 +98,12 @@ export const projects: Project[] = [
       'Custom CCTV-style post-process effect',
     ],
     theme: { name: 'urban', color: '#4a5568' },
-    media: [{ webm: '/media/tiptoe-thief.webm', mp4: '/media/tiptoe-thief.mp4' }],
+    media: [{ webm: '/media/tiptoe-thief.webm', mp4: '/media/tiptoe-thief.mp4', poster: '/media/tiptoe-thief.webp' }],
+    photos: [
+      { src: '/media/tiptoe-thief.webp', alt: 'Tiptoe Thief project thumbnail' },
+      { src: '/media/tiptoe-living-room.webp', alt: 'CCTV view of the thief in the living room' },
+      { src: '/media/tiptoe-bedroom.webp', alt: 'CCTV view of the thief in a bedroom' },
+    ],
     links: [{ label: 'Play on itch.io', url: 'https://kaif006.itch.io' }],
   },
   {
