@@ -59,6 +59,10 @@ export const projects: Project[] = [
     ],
     theme: { name: 'burnt orange desert', color: '#c8651b' },
     media: [{ webm: '/media/harsh-dunes.webm', mp4: '/media/harsh-dunes.mp4' }],
+    photos: [
+      { src: '/media/harsh-dunes-settlement.png', alt: 'The player approaches a desert settlement beneath sandstone cliffs' },
+      { src: '/media/harsh-dunes-encounter.png', alt: 'The player faces another character near a boulder in the desert' },
+    ],
     links: [],
   },
   {
@@ -122,6 +126,12 @@ export const projects: Project[] = [
     ],
     theme: { name: 'pale lemon mesa', color: '#e8d77a' },
     media: [{ webm: '/media/comic-fight.webm', mp4: '/media/comic-fight.mp4' }],
+    photos: [
+      { src: '/media/comic-fight-start.png', alt: 'Comic Fight start screen with two fighters in a desert arena' },
+      { src: '/media/comic-fight-face-off.png', alt: 'Two fighters square off in the cel-shaded desert arena' },
+      { src: '/media/comic-fight-kick.png', alt: 'A fighter lands a high kick with a comic-book impact effect' },
+      { src: '/media/comic-fight-showcase.png', alt: 'Comic Fight projected on a large screen in an auditorium' },
+    ],
     links: [],
   },
 ]

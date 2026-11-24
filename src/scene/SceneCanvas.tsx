@@ -2,14 +2,28 @@ import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 import { Scene3D } from './Scene3D';
 
-export default function SceneCanvas({ projectTrack }: { projectTrack: RefObject<HTMLDivElement | null> }) {
+type SceneCanvasProps = {
+  projectTrack: RefObject<HTMLDivElement | null>;
+  chatOpen: boolean;
+};
+
+export default function SceneCanvas({ projectTrack, chatOpen }: SceneCanvasProps) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const sceneRef = useRef<Scene3D | null>(null);
 
   useEffect(() => {
     if (!ref.current || !projectTrack.current) return;
     const scene3d = new Scene3D(ref.current, projectTrack.current);
-    return () => scene3d.dispose(); // React dev mode mounts twice, so clean up
+    sceneRef.current = scene3d;
+    return () => {
+      scene3d.dispose();
+      sceneRef.current = null;
+    };
   }, [projectTrack]);
+
+  useEffect(() => {
+    sceneRef.current?.setChatOpen(chatOpen);
+  }, [chatOpen, projectTrack]);
 
   return (
     <canvas

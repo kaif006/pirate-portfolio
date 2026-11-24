@@ -1,19 +1,28 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node'
+import type { ServerResponse } from 'node:http'
+import type { VercelRequest } from '@vercel/node'
 import { Resend } from 'resend'
 import { requireEnv } from './_lib/config.js'
 import { allowRequest, clientKey } from './_lib/rateLimit.js'
 import { contactSchema } from './_lib/validate.js'
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+type ContactRequest = Pick<VercelRequest, 'method' | 'headers' | 'socket'> & { body?: unknown }
+
+export default async function handler(req: ContactRequest, res: ServerResponse) {
+  function json(status: number, body: object) {
+    res.statusCode = status
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify(body))
+  }
+
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')
-    return res.status(405).json({ ok: false, error: 'Method not allowed' })
+    return json(405, { ok: false, error: 'Method not allowed' })
   }
 
   // 1. Validate on the server (never trust the frontend).
   const parsed = contactSchema.safeParse(req.body)
   if (!parsed.success) {
-    return res.status(400).json({
+    return json(400, {
       ok: false,
       error: 'Please check the form fields.',
       fields: parsed.error.issues.map((issue) => ({
@@ -26,35 +35,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // 2. Honeypot: bots fill the hidden field. Pretend success, send nothing.
   if (website && website.length > 0) {
-    return res.status(200).json({ ok: true })
+    return json(200, { ok: true })
   }
 
-  // 3. Rate limit: 3 messages per hour per visitor.
-  const allowed = await allowRequest(clientKey(req, 'contact'), 3, 3600)
-  if (!allowed) {
-    return res.status(429).json({
-      ok: false,
-      error: 'Too many messages. Please try again later.',
-    })
-  }
-
-  // 4. Send. Plain text only, so visitor input is never rendered as HTML.
   try {
     const resend = new Resend(requireEnv('RESEND_API_KEY'))
+    const recipient = requireEnv('CONTACT_TO_EMAIL')
+    const allowed = await allowRequest(clientKey(req, 'contact'), 3, 3600)
+    if (!allowed) {
+      return json(429, { ok: false, error: 'Too many messages. Please try again later.' })
+    }
+
     const { error } = await resend.emails.send({
-      from: process.env.CONTACT_FROM_EMAIL ?? 'Portfolio <onboarding@resend.dev>',
-      to: [requireEnv('CONTACT_TO_EMAIL')],
+      from: process.env.CONTACT_FROM_EMAIL?.trim() || 'Portfolio <onboarding@resend.dev>',
+      to: [recipient],
       replyTo: email,
       subject: `[Portfolio] ${subject}`,
       text: `From: ${name} <${email}>\n\n${message}`,
     })
     if (error) {
-      console.error('Resend error:', error)
-      return res.status(500).json({ ok: false, error: 'Could not send your message.' })
+      console.error('Resend rejected contact mail:', error.name, error.statusCode)
+      return json(503, { ok: false, error: 'Email delivery is unavailable. Please email me directly.' })
     }
-    return res.status(200).json({ ok: true })
+    return json(200, { ok: true })
   } catch (err) {
     console.error('Contact handler error:', err)
-    return res.status(500).json({ ok: false, error: 'Could not send your message.' })
+    return json(503, { ok: false, error: 'The contact form is unavailable. Please email me directly.' })
   }
 }

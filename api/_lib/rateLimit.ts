@@ -4,7 +4,7 @@ import { supabase } from './clients.js'
 
 // Builds a rate-limit key from the visitor's IP. The IP is hashed with a salt
 // so no raw IP addresses are stored.
-export function clientKey(req: VercelRequest, scope: string): string {
+export function clientKey(req: Pick<VercelRequest, 'headers' | 'socket'>, scope: string): string {
   const forwarded = req.headers['x-forwarded-for']
   const first = Array.isArray(forwarded) ? forwarded[0] : forwarded
   const ip = first?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown'
@@ -13,8 +13,8 @@ export function clientKey(req: VercelRequest, scope: string): string {
   return `${scope}:${hash}`
 }
 
-// Returns true if the request is allowed. Uses the check_rate_limit() function
-// defined in supabase/schema.sql. If the check itself fails, we deny (fail closed).
+// Uses the check_rate_limit() function defined in supabase/schema.sql.
+// A failed check blocks delivery and lets the caller report an unavailable service.
 export async function allowRequest(
   key: string,
   limit: number,
@@ -25,9 +25,6 @@ export async function allowRequest(
     p_limit: limit,
     p_window_seconds: windowSeconds,
   })
-  if (error) {
-    console.error('Rate limit check failed:', error.message)
-    return false
-  }
+  if (error) throw new Error(`Rate limit check failed: ${error.message}`)
   return data === true
 }

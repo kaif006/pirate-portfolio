@@ -59,6 +59,7 @@ cp .env.example .env.local   # then fill in the values
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server only, secret) |
 | `RESEND_API_KEY` | Resend API key |
 | `CONTACT_TO_EMAIL` | Inbox that receives contact messages |
+| `CONTACT_FROM_EMAIL` | Sender on a domain verified in Resend |
 | `IP_HASH_SALT` | Random string used to hash visitor IPs |
 
 ### Database
@@ -77,9 +78,15 @@ Re-run this whenever you edit files in `data/knowledge/`.
 ### Run locally
 
 ```bash
-npm run dev        # frontend only
+npm run dev        # frontend and /api/contact using .env.local
 npx vercel dev     # frontend plus the /api functions
 ```
+
+The contact form requires an active Supabase project with `supabase/schema.sql`
+applied and a Resend key with sending access. For local testing with
+`onboarding@resend.dev`, set `CONTACT_TO_EMAIL` to the email on your Resend
+account. For a different recipient, set `CONTACT_FROM_EMAIL` to a sender on a
+verified domain. On Vercel, configure the same server-side variables and redeploy.
 
 ## Deployment
 

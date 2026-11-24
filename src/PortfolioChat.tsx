@@ -10,8 +10,7 @@ const prompts = [
 
 type Message = { role: 'visitor' | 'assistant'; text: string };
 
-export default function PortfolioChat() {
-  const [open, setOpen] = useState(false);
+export default function PortfolioChat({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const [draft, setDraft] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [pending, setPending] = useState(false);
@@ -32,7 +31,7 @@ export default function PortfolioChat() {
   useEffect(() => () => request.current?.abort(), []);
 
   function close() {
-    setOpen(false);
+    onOpenChange(false);
     launcher.current?.focus();
   }
 
@@ -149,7 +148,7 @@ export default function PortfolioChat() {
         className="chat-launcher ink-button"
         aria-expanded={open}
         aria-controls={open ? 'portfolio-chat-panel' : undefined}
-        onClick={open ? close : () => setOpen(true)}
+        onClick={open ? close : () => onOpenChange(true)}
       >
         <span className="chat-launcher-icon" aria-hidden="true" />
         Portfolio chat

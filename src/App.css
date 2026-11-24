@@ -195,8 +195,17 @@ h1, h2, h3 {
   font-size: 0.76rem;
 }
 
-.project-gallery, #contact {
+.project-reel, .project-gallery, #contact {
   margin-top: clamp(2rem, 7vw, 6rem);
+}
+
+.project-reel video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--rule);
+  background: var(--ink);
 }
 
 .project-gallery {

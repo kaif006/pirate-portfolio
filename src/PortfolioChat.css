@@ -190,3 +190,9 @@
   min-height: 2.75rem;
 }
 
+@media (max-width: 760px) {
+  .chat-panel {
+    height: min(28rem, 60dvh);
+  }
+}
+

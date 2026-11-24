@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import SceneCanvas from './scene/SceneCanvas';
 import ContactForm from './ContactForm';
 import ProjectPhotos from './ProjectPhotos';
@@ -15,16 +15,18 @@ const skills = [
 
 export default function App() {
   const projectTrack = useRef<HTMLDivElement>(null);
+  const [chatOpen, setChatOpen] = useState(false);
 
   return (
     <>
-      <SceneCanvas projectTrack={projectTrack} />
+      <SceneCanvas projectTrack={projectTrack} chatOpen={chatOpen} />
       <a className="skip-link" href="#main">Skip to content</a>
       <header className="site-header">
-        <a className="wordmark" href="#about">doofenschmertz evil inc<span>.</span></a>
+        <a className="wordmark" href="#about">doofenschmirtz evil inc<span>.</span></a>
         <nav aria-label="Main navigation">
           <a href="#about">About</a>
           <a href="#skills">Skills</a>
+          <a href="#reel">Reel</a>
           <a href="#projects">Projects</a>
           <a href="#experience">Experience</a>
           <a href="#contact">Contact</a>
@@ -56,6 +58,22 @@ export default function App() {
               </div>
             ))}
           </div>
+        </section>
+
+        <section className="paper-panel content-width project-reel" id="reel" aria-labelledby="reel-title">
+          <h2 id="reel-title">Projects reel</h2>
+          <video
+            controls
+            playsInline
+            preload="none"
+            width={1280}
+            height={720}
+            poster={`${import.meta.env.BASE_URL}media/projects-reel-poster.webp`}
+            aria-labelledby="reel-title"
+          >
+            <source src={`${import.meta.env.BASE_URL}media/projects-reel-720p.mp4`} type="video/mp4" />
+            <a href={`${import.meta.env.BASE_URL}media/projects-reel-720p.mp4`}>Download the projects reel</a>
+          </video>
         </section>
 
         <section className="project-gallery" id="projects" aria-labelledby="projects-title">
@@ -142,7 +160,7 @@ export default function App() {
         <span>Muhammad Kaif</span>
         <span><a href="https://sketchfab.com/3d-models/gislinge-viking-boat-01098ad7973647a9b558f41d2ebc5193">Gislinge Viking Boat</a> by Opus Poly · <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></span>
       </footer>
-      <PortfolioChat />
+      <PortfolioChat open={chatOpen} onOpenChange={setChatOpen} />
     </>
   );
 }
