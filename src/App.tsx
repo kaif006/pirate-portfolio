@@ -159,6 +159,9 @@ export default function App() {
       <footer className="site-footer">
         <span>Muhammad Kaif</span>
         <span><a href="https://sketchfab.com/3d-models/gislinge-viking-boat-01098ad7973647a9b558f41d2ebc5193">Gislinge Viking Boat</a> by Opus Poly · <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></span>
+        <span>Wave math inspired by <a href="https://www.youtube.com/watch?v=PH9q0HNBjT4">Acerola’s How Games Fake Water</a></span>
+        <span>Water shader inspiration from <a href="https://cardadfar.github.io/japanese_water_shader/images/paper.pdf">Japanese-Style Toon-Based Water Shader</a> by Oscar Dadfar and Joel Welling</span>
+        <span>Wave contour lines inspired by <a href="https://www.shadertoy.com/view/lltBWM">Contour lines on Shadertoy</a> by 8x</span>
       </footer>
       <PortfolioChat open={chatOpen} onOpenChange={setChatOpen} />
     </>
