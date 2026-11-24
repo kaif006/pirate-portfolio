@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Water } from './Water';
+import { Background } from './Background';
 
 const PAPER = 0xf2e8d0;
 
@@ -20,14 +21,15 @@ export class Scene3D {
     // dissable for debugging
     //this.scene.fog = new THREE.Fog(PAPER, 40, 120);
 
-    this.camera.position.set(0, 14, 18);
-    this.camera.lookAt(0, 0, 0);
+    this.camera.position.set(0, 6, 22);
+    this.camera.lookAt(0, 2, -10);
 
     this.scene.add(new THREE.AmbientLight(0xffffff, 0.9));
     const sun = new THREE.DirectionalLight(0xffffff, 1.2);
     sun.position.set(10, 20, 8);
     this.scene.add(sun);
 
+    new Background(this);
     const test = new Water(this);
     test.mesh.position.y = 0;
 

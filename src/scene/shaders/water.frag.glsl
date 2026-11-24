@@ -1,48 +1,84 @@
-varying vec2 vUv;
+uniform float uTime;
+
 varying float vElevation;
 varying float vWavePhase;
 varying vec3 vPosition;
+varying vec3 vWorldPosition;
 
-void main() {
-    vec3 darkBlue = vec3(0.02, 0.08, 0.22);
-    vec3 deepBlue = vec3(0.04, 0.16, 0.35);
-    vec3 midBlue = vec3(0.05, 0.25, 0.48);
-    vec3 lightBlue = vec3(0.15, 0.55, 0.70);
-    vec3 foamWhite = vec3(0.92, 0.95, 0.85);
+const vec3  LIGHT_DIR      = vec3(0.4, 0.8, 0.5);
+const float FOAM_HEIGHT = 0.8;
+const float LINE_DENSITY   = 5.5;
+const float GRAIN_AMOUNT   = 0.02;
 
-    float wave = sin(vWavePhase);
+float hash(vec2 p) 
+{
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
 
-    float band1 = step(-0.3, wave);
-    float band2 = step(0.3, wave);
-    float band3 = step(0.75, wave);
+float vnoise(vec2 p) 
+{
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+}
 
-    vec3 color = darkBlue;
+void main() 
+{
+    vec3 ink       = vec3(0.02, 0.07, 0.19);
+    vec3 darkBlue  = vec3(0.03, 0.12, 0.30);
+    vec3 deepBlue  = vec3(0.05, 0.22, 0.43);
+    vec3 midBlue   = vec3(0.12, 0.40, 0.60);
+    vec3 lightBlue = vec3(0.35, 0.65, 0.76);
+    vec3 foamWhite = vec3(0.95, 0.93, 0.84);
+    vec3 paper     = vec3(0.91, 0.86, 0.72);
 
-    color = mix(color, deepBlue, band1);
-    color = mix(color, midBlue, band2);
-    color = mix(color, lightBlue, band3);
+    vec3 N = normalize(cross(dFdx(vWorldPosition), dFdy(vWorldPosition)));
+    vec3 V = normalize(cameraPosition - vWorldPosition);
+    if (dot(N, V) < 0.0) N = -N;
+    float diffuse = dot(N, normalize(LIGHT_DIR));
 
-    float phase = fract(vWavePhase / 6.2831853);
+    float tone = sin(vWavePhase) * 0.30 + (vElevation - 0.4) * 0.35 + diffuse * 0.30;
 
-    float foam1 = sin(vPosition.z * 2.0 + sin(vPosition.z * 0.5) * 2.0);
-    float foam2 = sin(vPosition.z * 2.3 + sin(vPosition.z * 0.7) * 1.8 + 2.0);
-    float foam3 = sin(vPosition.z * 1.7 + sin(vPosition.z * 0.4) * 2.5 + 4.0);
+    vec3 color = ink;
+    color = mix(color, darkBlue,  step(-0.35, tone));
+    color = mix(color, deepBlue,  step(-0.05, tone));
+    color = mix(color, midBlue,   step( 0.25, tone));
+    color = mix(color, lightBlue, step( 0.55, tone));
 
-    float mask1 = smoothstep(0.1, 0.5, foam1);
-    float mask2 = smoothstep(0.1, 0.5, foam2);
-    float mask3 = smoothstep(0.1, 0.5, foam3);
+    float t  = tone * LINE_DENSITY + (vnoise(vPosition.xz * 0.8) - 0.5) * 0.6;
+    float f  = fract(t);
+    float fw = fwidth(t);
+    float contour = 1.0 - smoothstep(fw * 0.8, fw * 1.8, f);
+    color = mix(color, ink, contour * 0.55 * step(-0.35, tone));
 
-    float width1 = 0.003 + 0.009 * mask1;
-    float width2 = 0.003 + 0.009 * mask2;
-    float width3 = 0.003 + 0.009 * mask3;
+    //faom
+    float n = vnoise(vPosition.xz * vec2(1.6, 3.2) + vec2(uTime * 0.15, 0.0))
+            + 0.5 * vnoise(vPosition.xz * vec2(3.5, 7.0));
+    float h = vElevation + (n - 0.75) * 0.45;
+    float foam = step(FOAM_HEIGHT, h);
+    float ring = step(FOAM_HEIGHT - 0.07, h) - foam;
 
-    float line1 = 1.0 - smoothstep(width1 * 0.7, width1, abs(phase - 0.18));
-    float line2 = 1.0 - smoothstep(width2 * 0.7, width2, abs(phase - 0.24));
-    float line3 = 1.0 - smoothstep(width3 * 0.7, width3, abs(phase - 0.30));
+    color = mix(color, ink, ring);
+    color = mix(color, foamWhite * mix(0.85, 1.0, step(0.25, tone)), foam);
 
-    float lines = max(line1 * mask1, max(line2 * mask2, line3 * mask3));
+    //foam dot things
+    vec2 g = vPosition.xz * 6.0;
+    vec2 cell = floor(g);
+    float r = hash(cell);
+    float dotShape = step(length(fract(g) - 0.5), 0.18 * r);
+    float dotZone  = step(FOAM_HEIGHT - 0.55, h) * (1.0 - step(FOAM_HEIGHT - 0.07, h));
+    color = mix(color, foamWhite, dotShape * step(0.6, r) * dotZone);
 
-    color = mix(color, foamWhite, lines);
+    //fog
+    float dist = distance(cameraPosition, vWorldPosition);
+    float fade = floor(smoothstep(30.0, 50.0, dist) * 4.0) / 4.0;
+    color = mix(color, paper, fade);
+
+    //noise
+    float grain = hash(floor(gl_FragCoord.xy * 0.75)) - 0.5;
+    float fibre = vnoise(gl_FragCoord.xy * vec2(0.9, 0.04)) - 0.5;
+    color += (grain * 0.6 + fibre * 0.4) * GRAIN_AMOUNT;
 
     gl_FragColor = vec4(color, 1.0);
 }
