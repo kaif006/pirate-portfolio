@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "functions": {
+    "api/portfolio-chat.py": {
+      "includeFiles": "{portfolio_chat/**,data/knowledge/**}"
+    }
+  }
+}

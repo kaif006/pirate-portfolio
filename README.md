@@ -88,10 +88,41 @@ npx vercel dev     # frontend plus the /api functions
 3. Add the environment variables above in Project Settings.
 4. Deploy. Every push to `main` redeploys automatically.
 
+### Preview the Python portfolio assistant
+
+The Vite project also exposes the Python assistant at `POST /api/portfolio-chat`.
+It reads `data/knowledge/` and uses Gemini directly. The first question on a new
+function instance builds an in-memory index that later requests can reuse.
+
+1. Set `GEMINI_API_KEY` for the Preview environment in your Vercel project.
+2. Push a branch with the deployment files to create a Preview.
+3. Send a question to the Preview URL. If Deployment Protection is enabled,
+   authenticate with Vercel before calling the route.
+
+```bash
+curl -fS https://YOUR-PREVIEW.vercel.app/api/portfolio-chat \
+  -H 'Content-Type: application/json' \
+  -d '{"question":"What projects has Kaif worked on?"}'
+```
+
+Expect JSON with an `answer` grounded in the portfolio Markdown. The route also
+accepts `message` as an alias for `question`. To adopt it in the portfolio, point
+the chat form at the same-origin `/api/portfolio-chat` path after verifying the
+Preview. Apply rate limiting to the Python route before public use to protect
+your Gemini quota.
+
+For local testing from the repo root, put `GEMINI_API_KEY` in `.env`, install
+`requirements.txt` in your virtual environment, and run:
+
+```bash
+python -m uvicorn portfolio_chat.api:app --port 8000
+```
+
 ## Project structure
 
 ```
 api/            Vercel serverless functions (chat, contact) and shared helpers
+portfolio_chat/ Python assistant and Markdown retrieval
 data/knowledge/ Documents used by the chatbot
 public/         Exported models (GLB), clips and promo video, audio
 scripts/        ingest.ts (build the vector index)
